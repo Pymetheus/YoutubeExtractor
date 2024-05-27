@@ -7,7 +7,8 @@ In addition, the history and metadata can optionally be saved to a MySQL databas
 
 YoutubeExtractor is developed using [yt-dlp](https://github.com/yt-dlp/yt-dlp).
 
-**NOTE:** *Please note that downloading videos/audios of a content you do not own might be illegal in your country. This is for educational purposes only. I'm not responsible for any misuse of this program.*
+**NOTE:** *Please note that downloading videos/audios of content you do not own might be illegal in your country. 
+This is for educational purposes only. I'm not responsible for any misuse of this program.*
 
 ![Download](res/Downloading.png)
 
@@ -25,7 +26,7 @@ YoutubeExtractor is developed using [yt-dlp](https://github.com/yt-dlp/yt-dlp).
 Simply enter the YouTube url into the python program and specify if you want to download only the audio 
 and/or write the data to the MySQL database.
 
-If you decide to write the metadata to database, the installation of MySQL is required manually. 
+If you decide to write metadata to database, the installation of MySQL is required manually. 
 The program will create a new schema **db_youtube_av** and following tables **youtube_music**, **youtube_video**
 
 ## Requirements
@@ -36,3 +37,33 @@ The program will create a new schema **db_youtube_av** and following tables **yo
 
 ## Getting Started
 ### Installation
+
+1. [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the repository to your local machine:
+
+    ```bash
+    git clone https://github.com/Pymetheus/YoutubeExtractor.git
+    ```
+
+2. Change into the project directory:
+
+    ```bash
+    cd  YoutubeExtractor
+    ```
+3. Update the API keys in the config.ini
+
+    ```bash
+   cd YoutubeExtractor\.config\config.ini
+   ```
+4. Setup virtual environment and install requirements.txt
+
+    ```bash
+    python -m venv .venv
+    source .venv/bin/activate
+    python -m pip install -r requirements.txt
+   ```
+   
+5. Activate virtual environment and run program
+
+    ```bash
+    python src\main.py
+   ```
