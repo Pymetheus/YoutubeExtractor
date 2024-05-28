@@ -43,7 +43,6 @@ def verify_url(url):
     if is_connected_to_url(url):
         if is_youtube_url(url):
             return True
-
     print("Verification failed")
 
 
