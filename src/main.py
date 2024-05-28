@@ -3,6 +3,7 @@ from YoutubeDL import YoutubeDL
 
 
 def execute_youtube_extractor(url: str, audio_only: bool = True, write_to_db: bool = True):
+    # Control if url is from a playlist or track and continue execution
     playlist_string = "list="
     if playlist_string in url:
         print("Recognized playlist url, downloading all entries")
@@ -15,6 +16,7 @@ def execute_youtube_extractor(url: str, audio_only: bool = True, write_to_db: bo
 
 
 def is_youtube_url(url):
+    # Control if url is from YouTube
     youtube_string = "www.youtube.com/watch"
     if youtube_string in url:
         return True
@@ -24,6 +26,7 @@ def is_youtube_url(url):
 
 
 def is_connected_to_url(url):
+    # Control if program can connect to url
     try:
         response = requests.get(url, timeout=15)
         return True
@@ -36,16 +39,16 @@ def is_connected_to_url(url):
 
 
 def verify_url(url):
+    # Verify if url is executable
     if is_connected_to_url(url):
         if is_youtube_url(url):
             return True
-        else:
-            print("Verification failed")
-    else:
-        print("Verification failed")
+
+    print("Verification failed")
 
 
 def user_input():
+    # Handle user input and return user response as a list for further execution
     user_url_response = user_url_request()
     user_audio_only_response = user_audio_request()
     user_db_response = user_db_request()
@@ -55,11 +58,13 @@ def user_input():
 
 
 def user_url_request():
+    # Handle user url request and return url
     user_url = str(input("Enter the youtube url you want to download from: "))
     return user_url
 
 
 def user_audio_request():
+    # Handle user audio request and return option
     user_audio_choice = str(input(
         """
         Select from the options:
@@ -81,6 +86,7 @@ def user_audio_request():
 
 
 def user_db_request():
+    # Handle user db request and return option
     user_db_choice = str(input(
         """
         Select from the options:
@@ -102,6 +108,7 @@ def user_db_request():
 
 
 def user_program_continuation():
+    # Handle user continuation request and return option
     user_choice = str(input(
         """
         Select from the options:
@@ -123,26 +130,24 @@ def user_program_continuation():
 
 
 def execute_main():
-    run_program = True
-    while run_program:
-        response = user_input()
-        request_url = response[0]
-        request_audio = response[1]
-        request_db = response[2]
+    # Execute main program
+    try:
+        run_program = True
+        while run_program:
+            response = user_input()
+            request_url = response[0]
+            request_audio = response[1]
+            request_db = response[2]
 
-        if verify_url(request_url):
-            execute_youtube_extractor(request_url, audio_only=request_audio, write_to_db=request_db)
+            if verify_url(request_url):
+                execute_youtube_extractor(request_url, audio_only=request_audio, write_to_db=request_db)
 
-        run_program = user_program_continuation()
+            run_program = user_program_continuation()
+
+    except Exception as e:
+        print(e)
 
 
 if __name__ == '__main__':
-    print("MAIN")
-
-# my_url = "https://www.youtube.com/watch?v=9ao4FEaDGhQ"
-# my_url = "https://www.google.com/search?client=firefox-b-d&q=erkennen+englisch"
-# t_url = "https://www.youtube.com/watch?v=Dpe4FgGDmcA&list=PL91EbznIQz17bowB66x-rLT0AEc7LueS6"
 
 execute_main()
-
-
