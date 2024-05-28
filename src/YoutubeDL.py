@@ -180,15 +180,3 @@ class YoutubeDL(object):
 
 if __name__ == '__main__':
     print('### TEST ###')
-
-    # TRACK TEST
-    s_url = "https://www.youtube.com/watch?v=9ao4FEaDGhQ"
-    Test_YT = YoutubeDL(s_url, True, True)
-    Test_YT.execute_track_download()
-    Test_YT = YoutubeDL(s_url, False, True)
-    Test_YT.execute_track_download()
-
-    # PLAYLIST TEST
-    #t_url = "https://www.youtube.com/watch?v=Dpe4FgGDmcA&list=PL91EbznIQz17bowB66x-rLT0AEc7LueS6"
-    #Test_YT = YoutubeDL(t_url, True)
-    #Test_YT.execute_playlist_download()
