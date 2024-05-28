@@ -31,6 +31,7 @@ and/or write the data to the MySQL database.
 
 If you choose to write metadata to the database, you must manually install MySQL.
 The program will create a new schema **db_youtube_av** and the following tables **youtube_music**, **youtube_video**
+
 The media will be automatically downloaded to the **data** folder.
 
 ## Requirements
@@ -66,7 +67,7 @@ The media will be automatically downloaded to the **data** folder.
     python -m pip install -r requirements.txt
    ```
    
-5. Activate virtual environment and run program
+5. Run program
 
     ```bash
     python src\main.py
