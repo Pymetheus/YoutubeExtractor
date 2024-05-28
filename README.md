@@ -31,6 +31,7 @@ and/or write the data to the MySQL database.
 
 If you choose to write metadata to the database, you must manually install MySQL.
 The program will create a new schema **db_youtube_av** and the following tables **youtube_music**, **youtube_video**
+The media will be automatically downloaded to the **data** folder.
 
 ## Requirements
 - [Python 3.x](https://www.python.org/downloads/)
@@ -77,7 +78,7 @@ and is organized into three separate modules: **main**, **YoutubeDL** and **DBMS
 
 In the **main** module, user input is handled and verified before being forwarded to **YoutubeDL**. 
 Using the [yt-dlp](https://github.com/yt-dlp/yt-dlp) library, 
-the program downloads media in the best available quality. 
+the program downloads media in the best available quality and saves it automatically to the **data** directory.
 If selected, the metadata of the downloaded files are saved to the MySQL database using the **DBMS** module.
 
 ### Contributing
