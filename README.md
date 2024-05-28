@@ -23,7 +23,8 @@ This is for educational purposes only. I'm not responsible for any misuse of thi
 - [License](#license)
 
 ## Instructions
-Simply enter the YouTube url into the python program and specify if you want to download only the audio 
+Simply enter the YouTube url from a playlist or single track into the python program 
+and specify if you want to download only the audio 
 and/or write the data to the MySQL database.
 
 If you decide to write metadata to database, the installation of MySQL is required manually. 
@@ -67,3 +68,22 @@ The program will create a new schema **db_youtube_av** and following tables **yo
     ```bash
     python src\main.py
    ```
+   
+### Source Code
+The source code of the YoutubeExtractor is located in the **src** directory, 
+organized into the separate modules **main**, **YoutubeDL** and **DBMS**.
+
+In **main** the user input gets handled and after verification forwarded to **YoutubeDL**.
+Leveraging the [yt-dlp](https://github.com/yt-dlp/yt-dlp) library, 
+the program is downloading the media in the best available quality.
+If selected the metadata of the downloaded file are getting saved to the MySQL database using the **DBMS**.
+
+### Contributing
+Contributions to this project are welcome! If you would like to contribute, 
+please open an issue to discuss potential changes or submit a pull request.
+For more details please visit the [contributing page](docs/CONTRIBUTING.md).
+
+### License
+
+This project is licensed under the [MIT License](LICENSE.md). 
+You are free to use, modify, and distribute this code as permitted by the license.
