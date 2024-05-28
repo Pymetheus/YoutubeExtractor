@@ -6,13 +6,13 @@ Additionally, the history and metadata can optionally be saved to a MySQL databa
 
 YoutubeExtractor is developed using [yt-dlp](https://github.com/yt-dlp/yt-dlp).
 
-**NOTE:** *Downloading videos or audio of content you do not own might be illegal in your country. 
-This program is intended for educational purposes only. 
-I am not responsible for any misuse of this program.*
-
 <p align="center">
   <img src="res/Downloading.png" />
 </p>
+
+**NOTE:** *Downloading videos or audio of content you do not own might be illegal in your country. 
+This program is intended for educational purposes only. 
+I am not responsible for any misuse of this program.*
 
 ## Table of Contents
 
