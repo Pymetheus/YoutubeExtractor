@@ -14,8 +14,6 @@ This is for educational purposes only. I'm not responsible for any misuse of thi
   <img src="res/Downloading.png" />
 </p>
 
-![Download](res/Downloading.png)
-
 ## Table of Contents
 
 - [Instructions](#Instructions)
