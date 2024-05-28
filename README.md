@@ -10,6 +10,10 @@ YoutubeExtractor is developed using [yt-dlp](https://github.com/yt-dlp/yt-dlp).
 **NOTE:** *Please note that downloading videos/audios of content you do not own might be illegal in your country. 
 This is for educational purposes only. I'm not responsible for any misuse of this program.*
 
+<p align="center">
+  <img src="res/Downloading.png" />
+</p>
+
 ![Download](res/Downloading.png)
 
 ## Table of Contents
