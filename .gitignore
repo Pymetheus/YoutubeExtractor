@@ -162,3 +162,5 @@ cython_debug/
 # Config file
 .config/config.ini
 
+# Ignore test folder
+test/

@@ -1,10 +1,10 @@
 # YoutubeExtractor
 
 YouTubeExtractor is a Python application used to download videos or entire playlists from YouTube. 
-It also offers the option to download only the audio, converting the output into either MP3 or MP4 formats. 
-Additionally, the history and metadata can optionally be saved to a MySQL database. 
+It supports downloading audio-only or audio with video, saving files in MP3 or MP4 formats.
+Optionally, it can save metadata to a database (SQLite by default, with support for MySQL and PostgreSQL).
 
-YoutubeExtractor is developed using [yt-dlp](https://github.com/yt-dlp/yt-dlp).
+YoutubeExtractor leverages the powerful [yt-dlp](https://github.com/yt-dlp/yt-dlp) library.
 
 <p align="center">
   <img src="res/Downloading.png" />
@@ -12,7 +12,7 @@ YoutubeExtractor is developed using [yt-dlp](https://github.com/yt-dlp/yt-dlp).
 
 **NOTE:** *Downloading videos or audio of content you do not own might be illegal in your country. 
 This program is intended for educational purposes only. 
-I am not responsible for any misuse of this program.*
+The author is not responsible for any misuse of this program.*
 
 ## Table of Contents
 
@@ -25,19 +25,19 @@ I am not responsible for any misuse of this program.*
 - [License](#license)
 
 ## Instructions
-Simply enter the YouTube URL of a playlist or single track into the Python program 
-and specify if you want to download only the audio 
-and/or write the data to the MySQL database.
+Run the program and enter the YouTube URL for either a playlist or a single video.
+Then select whether to download audio only or audio and video, and whether to write metadata to the database.
 
-If you choose to write metadata to the database, you must manually install MySQL.
-The program will create a new schema **db_youtube_av** and the following tables **youtube_music**, **youtube_video**
+By default, metadata is stored in a local SQLite database.
+If you choose to use MySQL or PostgreSQL, ensure you have the respective database installed and configured.
+The program will automatically create necessary tables if they do not exist.
 
-The media will be automatically downloaded to the **data** folder.
+Downloaded media files are saved automatically to the data/ folder.
 
 ## Requirements
 - [Python 3.x](https://www.python.org/downloads/)
 - [FFmpeg](https://www.gyan.dev/ffmpeg/builds/)
-- [MySQL](https://dev.mysql.com/downloads/installer/)  **( optional )**
+- [sqlalchemy-dbtoolkit](https://github.com/Pymetheus/sqlalchemy-dbtoolkit)
 
 
 ## Getting Started
@@ -57,7 +57,7 @@ The media will be automatically downloaded to the **data** folder.
 3. Update the API keys in the config.ini
 
     ```bash
-   cd YoutubeExtractor\.config\config.ini
+   cd YoutubeExtractor\.config
    ```
 4. Setup virtual environment and install requirements.txt
 
@@ -74,13 +74,13 @@ The media will be automatically downloaded to the **data** folder.
    ```
    
 ### Source Code
-The source code of the YoutubeExtractor is located in the **src** directory, 
-and is organized into three separate modules: **main**, **YoutubeDL** and **DBMS**.
+The application code is organized under the src/ directory, split into three modules:
+- main.py — Handles user interaction, input validation, and program flow.
+- YoutubeDL.py — Wraps the yt-dlp functionality to download media.
+- database_handler.py — Manages metadata storage with support for SQLite, MySQL, and PostgreSQL.
 
-In the **main** module, user input is handled and verified before being forwarded to **YoutubeDL**. 
-Using the [yt-dlp](https://github.com/yt-dlp/yt-dlp) library, 
-the program downloads media in the best available quality and saves it automatically to the **data** directory.
-If selected, the metadata of the downloaded files are saved to the MySQL database using the **DBMS** module.
+The program uses yt-dlp to fetch the best quality media and stores it under data/. 
+Metadata is saved depending on user choice and configured database.
 
 ### Contributing
 Contributions to this project are welcome! If you would like to contribute, 
