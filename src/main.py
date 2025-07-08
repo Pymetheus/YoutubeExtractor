@@ -2,21 +2,42 @@ import requests
 from YoutubeDL import YoutubeDL
 
 
-def execute_youtube_extractor(url: str, audio_only: bool = True, write_to_db: bool = True):
-    # Control if url is from a playlist or track and continue execution
+def execute_youtube_extractor(url: str, audio_only: bool = True, write_to_db: bool = True, dbms="sqlite"):
+    """
+    Execute download process for a YouTube track or playlist.
+
+    Determines whether the URL points to a single video or a playlist, and triggers
+    the appropriate download handler.
+
+    Args:
+        url (str): The YouTube video or playlist URL.
+        audio_only (bool): If True, download only audio. Defaults to True.
+        write_to_db (bool): If True, write metadata to the database. Defaults to True.
+        dbms (str): Database type to use (e.g., "sqlite", "mysql", "postgresql"). Defaults to "sqlite".
+    """
+
     playlist_string = "list="
     if playlist_string in url:
         print("Recognized playlist url, downloading all entries")
-        YT = YoutubeDL(url, audio_only=audio_only, write_to_db=write_to_db)
+        YT = YoutubeDL(url, audio_only=audio_only, write_to_db=write_to_db, dbms=dbms)
         YT.execute_playlist_download()
     else:
         print("Recognized track url, downloading entry")
-        YT = YoutubeDL(url, audio_only=audio_only, write_to_db=write_to_db)
+        YT = YoutubeDL(url, audio_only=audio_only, write_to_db=write_to_db, dbms=dbms)
         YT.execute_track_download()
 
 
-def is_youtube_url(url):
-    # Control if url is from YouTube
+def is_youtube_url(url: str):
+    """
+    Check if the provided URL is a valid YouTube video URL.
+
+    Args:
+        url (str): The URL to verify.
+
+    Returns:
+        bool: True if the URL is a YouTube video URL, False otherwise.
+    """
+
     youtube_string = "www.youtube.com/watch"
     if youtube_string in url:
         return True
@@ -25,8 +46,17 @@ def is_youtube_url(url):
         return False
 
 
-def is_connected_to_url(url):
-    # Control if program can connect to url
+def is_connected_to_url(url: str):
+    """
+    Verify that the program can establish a connection to the given URL.
+
+    Args:
+        url (str): The target URL.
+
+    Returns:
+        bool: True if the connection is successful, False otherwise.
+    """
+
     try:
         response = requests.get(url, timeout=15)
         return True
@@ -38,16 +68,35 @@ def is_connected_to_url(url):
         return False
 
 
-def verify_url(url):
-    # Verify if url is executable
+def verify_url(url: str):
+    """
+    Perform full verification of the URL including connectivity and YouTube format.
+
+    Args:
+        url (str): The URL to verify.
+
+    Returns:
+        bool: True if the URL is valid and reachable, False otherwise.
+    """
+
     if is_connected_to_url(url):
         if is_youtube_url(url):
             return True
     print("Verification failed")
+    return False
 
 
 def user_input():
-    # Handle user input and return user response as a list for further execution
+    """
+    Prompt the user for input regarding the download parameters.
+
+    Returns:
+        list: A list containing user responses:
+              [0] -> YouTube URL (str),
+              [1] -> audio_only flag (bool),
+              [2] -> write_to_db flag (bool).
+    """
+
     user_url_response = user_url_request()
     user_audio_only_response = user_audio_request()
     user_db_response = user_db_request()
@@ -57,13 +106,25 @@ def user_input():
 
 
 def user_url_request():
-    # Handle user url request and return url
+    """
+    Prompt the user for the YouTube URL.
+
+    Returns:
+        str: The entered YouTube URL.
+    """
+
     user_url = str(input("Enter the youtube url you want to download from: "))
     return user_url
 
 
 def user_audio_request():
-    # Handle user audio request and return option
+    """
+    Prompt the user to choose between audio-only or full video download.
+
+    Returns:
+        bool: True if audio-only is selected, False otherwise.
+    """
+
     user_audio_choice = str(input(
         """
         Select from the options:
@@ -85,7 +146,13 @@ def user_audio_request():
 
 
 def user_db_request():
-    # Handle user db request and return option
+    """
+    Prompt the user to choose whether to write metadata to the database.
+
+    Returns:
+        bool: True if writing to the database is selected, False otherwise.
+    """
+
     user_db_choice = str(input(
         """
         Select from the options:
@@ -107,7 +174,13 @@ def user_db_request():
 
 
 def user_program_continuation():
-    # Handle user continuation request and return option
+    """
+    Prompt the user to decide whether to continue or terminate the program.
+
+    Returns:
+        bool: True if the user wants to continue, False to stop.
+    """
+
     user_choice = str(input(
         """
         Select from the options:
@@ -129,7 +202,13 @@ def user_program_continuation():
 
 
 def execute_main():
-    # Execute main program
+    """
+    Run the main program loop.
+
+    Continuously prompts the user for input and handles YouTube download requests
+    until the user chooses to terminate the session.
+    """
+
     try:
         run_program = True
         while run_program:
@@ -144,7 +223,7 @@ def execute_main():
             run_program = user_program_continuation()
 
     except Exception as e:
-        print(e)
+        print(f"An unexpected error occurred: {e}")
 
 
 if __name__ == '__main__':

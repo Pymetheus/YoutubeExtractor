@@ -1,34 +1,65 @@
+import os
 import yt_dlp
 import configparser
-from DBMS import MySQL
+from src.database_handler import DatabaseOperations
+from sqlalchemy_dbtoolkit.utils.sanitization import sanitize_nan_to_none
 
 
 class YoutubeDL(object):
+    """
+    A class to handle downloading media (audio or video) from YouTube and storing metadata optional in a database.
+    """
 
-    def __init__(self, url: str, audio_only: bool = True, write_to_db: bool = True):
-        # Initializing YoutubeDL class with url, options for audio only and writing metadata to DB
+    def __init__(self, url: str, audio_only: bool = True, write_to_db: bool = True, dbms: str = "sqlite",
+                 config_path: str = '../.config/config.ini', output_path: str = "../data"):
+        """
+        Initialize YoutubeDL instance with configuration and optional database integration.
+
+        Args:
+            url (str): URL of the YouTube video or playlist.
+            audio_only (bool): If True, download only audio; else, download video.
+            write_to_db (bool): If True, write metadata to the database.
+            dbms (str): Database management system ('sqlite', 'mysql', etc.).
+            config_path (str): Path to configuration file.
+            output_path (str): Directory to save downloaded media.
+        """
+
         self.url = url
-        self.output_path = "../data"
-        self.ffmpeg_location = ""
-        self.import_config()
         self.audio_only = audio_only
+        self.config_path = config_path
+        self.output_path = output_path
+        self.ffmpeg_location = None
+        self.import_config()
+
         self.write_to_db = write_to_db
         if self.write_to_db:
-            self.Audio_DB = self.initialize_audiovisual_db()
+            self.DB_Ops = DatabaseOperations(dbms=dbms)
+            self.DB_Ops.create_tables_if_not_exists()
 
     def import_config(self):
-        # Importing configuration from config.ini
+        """
+        Load configuration settings (e.g., FFmpeg location) from the config file.
+        """
         config = configparser.ConfigParser(interpolation=None)
-        config.read('../.config/config.ini')
+        config.read(self.config_path)
         self.ffmpeg_location = config["ffmpeg"]["ffmpeg_location"]
 
     def set_audio_only_options(self, filename: str):
-        # Setting options for audio only in the best quality and returning dictionary
+        """
+        Set yt_dlp options for downloading audio only.
+
+        Args:
+            filename (str): Output filename for the downloaded file.
+
+        Returns:
+            dict: yt_dlp configuration options for audio-only downloads.
+        """
+
         options = {
             'format': 'bestaudio',
-            'ffmpeg_location ': self.ffmpeg_location,
+            'ffmpeg_location': self.ffmpeg_location,
             'keepvideo': False,
-            'outtmpl': self.output_path + f"\{filename}",
+            'outtmpl': os.path.join(self.output_path, filename),
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
@@ -38,55 +69,83 @@ class YoutubeDL(object):
         return options
 
     def set_audiovisual_options(self, filename: str):
-        # Setting options for audiovisual in the best quality and returning dictionary
+        """
+        Set yt_dlp options for downloading audio and video.
+
+        Args:
+            filename (str): Output filename for the downloaded file.
+
+        Returns:
+            dict: yt_dlp configuration options for full audio-visual downloads.
+        """
+
         options = {
             'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-            'ffmpeg_location ': self.ffmpeg_location,
-            'outtmpl': self.output_path + f"\{filename}"
+            'ffmpeg_location': self.ffmpeg_location,
+            'outtmpl': os.path.join(self.output_path, filename)
         }
         return options
 
     def get_track_content(self):
-        # Getting extracted info from URL and returning it
+        """
+        Extract metadata from the YouTube video URL without downloading.
+
+        Returns:
+            dict: Metadata for the track.
+        """
+
         track_content = yt_dlp.YoutubeDL().extract_info(url=self.url, download=False)
         return track_content
 
     def get_playlist_content(self):
-        # Getting extracted info from Playlist URL and returning it
+        """
+        Extract metadata from the YouTube playlist URL without downloading.
+
+        Returns:
+            list: List of track metadata dictionaries in the playlist.
+        """
+
         playlist_info = yt_dlp.YoutubeDL().extract_info(url=self.url, download=False)
         playlist_content = playlist_info["entries"]
         return playlist_content
 
-    def get_playlist_length(self, playlist_content: dict):
-        # Get length of playlist from content and return integer with length
-        playlist_len = int(playlist_content[-1]["playlist_index"])
-        print(f"Videos in Playlist: {playlist_len}")
-        return playlist_len
-
     def generate_filename_from_track_content(self, track_content: dict):
-        # Generate filename with track and artist if available otherwise take the title, return filename
+        """
+        Generate a filename based on track content metadata.
+
+        Args:
+            track_content (dict): Metadata dictionary of a YouTube track.
+
+        Returns:
+            str: Sanitized and formatted filename.
+        """
+
         media_title = track_content["title"]
 
-        key_list = []
-        for item in track_content:
-            key_list.append(item)
-
-        if "track" and "artists" in key_list:
+        if "track" in track_content and "artists" in track_content:
             media_track = track_content["track"]
             media_track = media_track.split(" (")
-            media_track = media_track[0]
+            media_track = str(media_track[0])
             media_artist = track_content["artists"][0]
-            filename = f"{media_artist} - {media_track}".capitalize()
+            filename = f"{media_artist} - {media_track}"
         else:
             media_title = media_title.split(" (")
             media_title = media_title[0]
-            filename = f"{media_title}".capitalize()
+            media_title = media_title.split(" [")
+            media_title = media_title[0]
+            filename = f"{media_title}"
 
         print(f"FILENAME: {filename}")
         return filename
 
     def download_from_youtube(self, options: dict):
-        # Download media using options as an argument
+        """
+        Download media from YouTube using yt_dlp with the given options.
+
+        Args:
+            options (dict): yt_dlp configuration dictionary.
+        """
+
         try:
             with yt_dlp.YoutubeDL(options) as ydl:
                 ydl.download([self.url])
@@ -95,9 +154,12 @@ class YoutubeDL(object):
             print(e)
 
     def execute_playlist_download(self):
-        # Execute downloading media from playlist
+        """
+        Download all media items from a playlist URL.
+        """
+
         playlist_content = self.get_playlist_content()
-        playlist_length = self.get_playlist_length(playlist_content)
+        playlist_length = len(playlist_content)
 
         for index in range(playlist_length):
             track_content = playlist_content[index]
@@ -105,38 +167,51 @@ class YoutubeDL(object):
             self.execute_track_download()
 
     def execute_track_download(self):
-        # Execute downloading media
+        """
+        Download a single media item based on current self.url and store its metadata.
+        """
+
         track_content = self.get_track_content()
         track_filename = self.generate_filename_from_track_content(track_content)
 
         if self.audio_only:
             options = self.set_audio_only_options(track_filename)
+            if self.write_to_db:
+                table = self.DB_Ops.music_table
         else:
             options = self.set_audiovisual_options(track_filename)
+            if self.write_to_db:
+                table = self.DB_Ops.video_table
 
         self.download_from_youtube(options)
 
         if self.write_to_db:
-            self.write_metadata_to_audiovisual_db(track_content)
+            self.write_metadata_to_audiovisual_db(table, track_content)
         print("DOWNLOAD: FINISHED")
 
     def get_metadata(self, track_content: dict):
-        # Get metadata from track content and return a tuple for writing to DB
-        missing = "NA"
-        key_list = []
-        for item in track_content:
-            key_list.append(item)
+        """
+        Extract and sanitize metadata from track content for database insertion.
+
+        Args:
+            track_content (dict): Metadata dictionary from yt_dlp.
+
+        Returns:
+            tuple: Cleaned metadata (title, artist, track, album, duration, filename, url).
+        """
+
+        missing = sanitize_nan_to_none("NaN")
 
         title = track_content["title"]
-        if "artists" in key_list:
+        if "artists" in track_content:
             artists = track_content["artists"][0]
         else:
             artists = missing
-        if "track" in key_list:
+        if "track" in track_content:
             track = track_content["track"]
         else:
             track = missing
-        if "album" in key_list:
+        if "album" in track_content:
             album = track_content["album"]
         else:
             album = missing
@@ -144,39 +219,20 @@ class YoutubeDL(object):
         filename = self.generate_filename_from_track_content(track_content)
         url = track_content["original_url"]
 
-        # media_table_columns = ("title", "artists", "track", "album", "duration", "filename", "original_url")
         track_metadata = (title, artists, track, album, duration, filename, url)
         return track_metadata
 
-    def write_metadata_to_audiovisual_db(self, track_content):
-        # Get metadata and write them to DB
-        metadata = self.get_metadata(track_content)
-        self.Audio_DB.insert_row_into_table(metadata)
+    def write_metadata_to_audiovisual_db(self, table, track_content: dict):
+        """
+        Write track metadata to the specified database table.
 
-    def initialize_audiovisual_db(self):
-        # Initialize Audiovisual DB and create necessary tables
-        start_db = "db_root"
-        yt_db = "db_youtube_av"
-        if self.audio_only:
+        Args:
+            table: Database table object or name.
+            track_content (dict): Track metadata from yt_dlp.
+        """
 
-            table_name = "youtube_music"
-        else:
-            table_name = "youtube_video"
-        column_content = {
-            "col_name": ["id", "title", "artists", "track", "album", "duration", "filename", "original_url"],
-            "col_type": ["INT", "VARCHAR(100)", "VARCHAR(100)", "VARCHAR(100)", "VARCHAR(100)", "INT", "VARCHAR(200)",
-                         "VARCHAR(200)"],
-            "col_add": ["PRIMARY KEY AUTO_INCREMENT", "", "", "", "", "", "", ""]
-        }
-
-        Audiovisual_DB = MySQL(start_db)
-        Audiovisual_DB.create_new_database(yt_db)
-        Audiovisual_DB.switch_to_database(yt_db)
-        Audiovisual_DB.create_new_table_from_dict(table_name, column_content)
-        Audiovisual_DB.set_current_table(table_name)
-
-        return Audiovisual_DB
-
-
-if __name__ == '__main__':
-    print('### TEST ###')
+        try:
+            metadata = self.get_metadata(track_content)
+            self.DB_Ops.insert_data_in_table(Table=table, data=metadata)
+        except Exception as e:
+            print(f"Failed writing to database: {e}")
